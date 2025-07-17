@@ -60,12 +60,26 @@ if __name__=="__main__":
   model.eval()
 
   code_dir = os.path.dirname(os.path.realpath(__file__))
+
+  # Read in the two images
   img0 = imageio.imread(args.left_file)
   img1 = imageio.imread(args.right_file)
+
+  # Load the scale parameter and make sure it is valid
   scale = args.scale
   assert scale<=1, "scale must be <=1"
+
+  # Resize the images based on the provided scale
   img0 = cv2.resize(img0, fx=scale, fy=scale, dsize=None)
   img1 = cv2.resize(img1, fx=scale, fy=scale, dsize=None)
+
+  # If loading mono images, fake extend into RGB, where R=G=B
+  if len(img0.shape) == 2:
+    assert len(img0.shape) == len(img1.shape)
+    img0 = np.stack([img0, img0, img0], axis=-1)
+    img1 = np.stack([img1, img1, img1], axis=-1)
+
+  # Extract the Height and Width
   H,W = img0.shape[:2]
   img0_ori = img0.copy()
   logging.info(f"img0: {img0.shape}")
